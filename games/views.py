@@ -5,8 +5,8 @@ import json
 
 # Create your views here.
 def index(request):
-    getPlayList("1eQTM2gSBc9ARw1Pst4V72")
-    return render(request,'games/index.html',)
+    json_data = getPlayList("1eQTM2gSBc9ARw1Pst4V72")
+    return render(request,'games/index.html',{"listData":json_data} )
 
 def play(request):
     return render(request,'games/play.html')
@@ -14,6 +14,7 @@ def play(request):
 def score(request):
     return render(request,'games/score.html')
 #function use in view
+
 def getToken():
     auth_response = requests.post('https://accounts.spotify.com/api/token', {
     'grant_type': 'client_credentials',
@@ -24,6 +25,7 @@ def getToken():
     # save the access token
     access_token = auth_response.json()['access_token']
     return access_token 
+
 def getAlbum(SID):
     access_token = getToken()
     headers = {
@@ -46,7 +48,13 @@ def getPlayList(SID):
     OPTION_URL ='playlists/'
     # actual GET request with proper header
     r = requests.get(BASE_URL + OPTION_URL + SID , headers=headers)
-    json_data = r.json()
-    #json_data = json.dumps(r, indent=1)
-    print(json_data['tracks']['items'])
-    return json_data #json_data
+
+    
+    json_data = []
+    for i in range(len(r.json()["tracks"]["items"])):
+        json_data.append({"preview_url" : r.json()["tracks"]["items"][i]["track"]["preview_url"],
+                 "nameMusic":  r.json()["tracks"]["items"][i]["track"]["name"] ,
+                 "img" : r.json()["tracks"]["items"][i]["track"]["album"]["images"][0]["url"]})
+    
+    print(json.dumps(json_data, indent=4))
+    return json_data
