@@ -1,10 +1,109 @@
 {% extends 'games/layout.html' %}
 {% block content %}
-
+<br>
 <div class="row log">
-    <div class="mx-auto">
-        <h1 style="text-align:center;">Play Music Game!</h1>
-    </div>
+    <p class="fs-1" style="text-align: center;">Play Music Game!</p>
 </div>
+<br>
+<center>
+    <p id="Number" class="fs-1"></p>
+
+    <button id="start" type="button" class="btn btn-danger" onclick="startGame('{{numberMusic}}')">Start</button>
+        {% for i in listMusic %}
+        <div id="{{i.index}}" style="display: none;">
+
+            <div>
+                <img src='{{ i.img }}' alt="Italian Trulli">
+            </div>
+            <div>
+                <audio controls id="music{{i.index}}" style="display: none;">
+                    <source src='{{ i.preview_url }}' type="audio/ogg">
+                    <source src='{{ i.preview_url }}' type="audio/mpeg">
+                    Your browser does not support the audio element.
+                </audio>
+            </div>
+            <br>
+            <div id="choice" class="row align-items-center" style="display:block;">
+                {% for choice in i.choice %}
+                <div class="col-3">
+                    <button type="button" class="btn btn-success">{{ choice }}</button>
+                </div>
+                <br>
+                {% endfor %}
+            </div>
+            <br>
+            <div id="next" class="row align-items-center" style="display:none;">
+                <div class="col">
+                    <button type="button" class="btn btn-success" onclick="NextMusic('{{ i.index }}')">Next</button>
+                </div>
+            </div>
+            <br>
+        </div>
+        {% endfor %}
+</center>
+</div>
+
+<script>
+    function startGame(numberMusic) {
+        var id = "Number";
+        var count = 5;
+        var start = document.getElementById("start");
+        start.style.display = "none";
+
+        var now = new Date().getTime();
+        var countDownDate = now + (count * 1000);
+        var distance = countDownDate - now;
+        var seconds = Math.ceil((distance % (1000 * 60)) / 1000);
+        document.getElementById(id).innerHTML = seconds + " S ";
+
+        var x = setInterval(function () {
+            now = new Date().getTime();
+            distance = countDownDate - now;
+            seconds = Math.ceil((distance % (1000 * 60)) / 1000);
+            document.getElementById(id).innerHTML = seconds + " S ";
+            if (distance < 0) {
+                clearInterval(x);
+                NextMusic(0);
+            }
+        }, 1000);
+    }
+
+    function NextMusic(index) {
+        
+        index = parseInt(index);
+        index =index+1;
+        var music = document.getElementById(index+'');
+        music.style.display = 'block';
+        var next = document.getElementById("next")
+        next.style.display = "none"
+        var ch = document.getElementById("choice")
+        ch.style.display = "block"
+        let id = "Number";
+        let seconds = 5;
+        playVid("music"+index)
+        var z = setInterval(function () {
+            document.getElementById(id).innerHTML = seconds + " S ";
+            seconds = seconds - 1;
+            if (seconds < 0) {
+                clearInterval(z);
+                pauseVid("music"+index);
+                ch.style.display = "none"
+                next.style.display = "block"
+            }
+
+        }, 1000);
+    
+    }
+
+    function playVid(name) {
+        var vid = document.getElementById(name);
+        vid.play();
+    }
+
+    function pauseVid(name) {
+        var vid = document.getElementById(name);
+        vid.pause();
+    }
+</script>
 
 {% endblock %}

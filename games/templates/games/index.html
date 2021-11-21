@@ -7,22 +7,10 @@
 </div>
 
 <center>
-    {% for x in listData %}
-    <div>
-        {{ x.nameMusic  }}
-    </div>
-   <div>
-    <img src= '{{ x.img }}' alt="Italian Trulli" width="256px" height="256px">
-   </div>
-    <div>
-        <audio controls autoplay >
-            <source src='{{ x.preview_url }}' type="audio/ogg">
-            <source src='{{ x.preview_url }}' type="audio/mpeg">
-          Your browser does not support the audio element.
-        </audio>
-    </div>
-    
-    {%endfor %}
+    <form action="{% url 'play' %}" method="get">
+        {% csrf_token %}
+        <button class="btn btn-primary" type="submit">Play</button>
+    </form>
 </center>
 
 
