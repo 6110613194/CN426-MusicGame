@@ -1,98 +1,182 @@
 {% extends 'games/layout.html' %}
 {% block content %}
-<br>
+{%load static %}
+
 <div class="row log">
-    <p class="fs-1" style="text-align: center;">Play Music Game!</p>
+    <p id="point" class="fs-3" style="text-align: center;">Play Music Game!</p>
+
 </div>
-<br>
 <center>
-    <p id="Number" class="fs-1"></p>
+    <p id="Number" class="fs-4"></p>
 
     <button id="start" type="button" class="btn btn-danger" onclick="startGame('{{numberMusic}}')">Start</button>
-        {% for i in listMusic %}
-        <div id="{{i.index}}" style="display: none;">
+    <div id="scoreform" style="display: none;">
+        <form action="{% url 'score'%}" method="post" class="row" style="text-align: center;">
+            {% csrf_token %}
+            <div class="col-2"></div>
+            <div class="col-3">
+                <p> Input your name </p>
+            </div>
+            <div class="col-3">
+                <input name="name" type="text" class="form-control" placeholder="name">
+            </div>
+            <div class="col-3">
+                <button type="submit" class="btn btn-primary mb-3">send</button>
+            </div>
+            <input id="score" name="score" type="hidden">
+            <input id="playlist" name="playlist" type="hidden" value='{{ playlist }}' >
+        </form>
+    </div>
 
-            <div>
-                <img src='{{ i.img }}' alt="Italian Trulli">
-            </div>
-            <div>
-                <audio controls id="music{{i.index}}" style="display: none;">
-                    <source src='{{ i.preview_url }}' type="audio/ogg">
-                    <source src='{{ i.preview_url }}' type="audio/mpeg">
-                    Your browser does not support the audio element.
-                </audio>
-            </div>
-            <br>
-            <div id="choice" class="row align-items-center" style="display:block;">
+
+    {% for i in listMusic %}
+    <div id="{{i.index}}" style="display: none;">
+
+        <div>
+            <img id="image{{i.index}}" src='{{ i.img }}' alt="Italian Trulli"
+                style="width: 450px; height: 450px; display: none;">
+            <img id="black{{i.index}}" src="{% static 'img/black.jpg' %}" alt="Italian Trulli"
+                style="width: 450px; height: 450px; display: block;">
+
+        </div>
+        <div>
+            <audio controls id="music{{i.index}}" style="display: none;">
+                <source src='{{ i.preview_url }}' type="audio/ogg">
+                <source src='{{ i.preview_url }}' type="audio/mpeg">
+                Your browser does not support the audio element.
+            </audio>
+        </div>
+        <br>
+        <div id="choice{{i.index}}" style="display:block;">
+            <div class="row">
+
                 {% for choice in i.choice %}
-                <div class="col-3">
-                    <button type="button" class="btn btn-success">{{ choice }}</button>
+                <div class="col">
+                    <button type="button" class="btn btn-success Answer"
+                        onclick="check('{{ i.nameMusic }}','{{ choice }}')">{{ choice }}</button>
+
+
                 </div>
-                <br>
+
                 {% endfor %}
             </div>
-            <br>
-            <div id="next" class="row align-items-center" style="display:none;">
-                <div class="col">
-                    <button type="button" class="btn btn-success" onclick="NextMusic('{{ i.index }}')">Next</button>
-                </div>
-            </div>
-            <br>
         </div>
-        {% endfor %}
+
+        <div id="next{{i.index}}" class="row align-items-center" style="display:none;">
+            <p id="{{i.nameMusic}}" class="fs-3" style="text-align: center;"> {{i.nameMusic}} </p>
+            <div class="col">
+                <button type="button" class="btn btn-success" onclick="NextMusic('{{ i.index }}')">Next</button>
+            </div>
+
+        </div>
+        <br>
+
+    </div>
+
+    {% endfor %}
 </center>
 </div>
 
 <script>
-    function startGame(numberMusic) {
+    var point = 0;
+    var numberMusic = 0;
+    var nameMusic = "";
+    function startGame(numbermusic) {
+        numberMusic = numbermusic;
         var id = "Number";
-        var count = 5;
+        let seconds = 5;
         var start = document.getElementById("start");
         start.style.display = "none";
 
-        var now = new Date().getTime();
-        var countDownDate = now + (count * 1000);
-        var distance = countDownDate - now;
-        var seconds = Math.ceil((distance % (1000 * 60)) / 1000);
         document.getElementById(id).innerHTML = seconds + " S ";
-
+        seconds = seconds - 1;
         var x = setInterval(function () {
-            now = new Date().getTime();
-            distance = countDownDate - now;
-            seconds = Math.ceil((distance % (1000 * 60)) / 1000);
             document.getElementById(id).innerHTML = seconds + " S ";
-            if (distance < 0) {
+            seconds = seconds - 1;
+            if (seconds < 0) {
                 clearInterval(x);
+                document.getElementById("point").innerHTML = point + " score  ";
                 NextMusic(0);
             }
         }, 1000);
     }
 
+    function check(ans, choice) {
+        var elems = document.getElementsByClassName("Answer");
+        nameMusic = ans;
+        for (var i = 0; i < elems.length; i++) {
+            elems[i].disabled = true;
+        }
+        if (ans === choice) {
+            point = point + 1;
+        }
+
+    }
+
     function NextMusic(index) {
-        
+        if (index >= numberMusic) {
+            var oldmusic = document.getElementById(index + '');
+            oldmusic.style.display = "none";
+
+            var oldnext = document.getElementById("next" + index);
+            oldnext.style.display = "none";
+
+            var scoreform = document.getElementById("scoreform");
+            scoreform.style.display = "block";
+
+            var score = document.getElementById("score");
+            score.value = point;
+            return
+        }
+        //Old music set 
         index = parseInt(index);
-        index =index+1;
-        var music = document.getElementById(index+'');
+        if (index > 0) {
+            var oldmusic = document.getElementById(index + '');
+            oldmusic.style.display = "none";
+
+            var oldnext = document.getElementById("next" + index);
+            oldnext.style.display = "none";
+
+        }
+        //Start new music
+        index = index + 1;
+
+        var music = document.getElementById(index + '');
         music.style.display = 'block';
-        var next = document.getElementById("next")
-        next.style.display = "none"
-        var ch = document.getElementById("choice")
+
+        var next = document.getElementById("next" + index);
+        next.style.display = "none";
+
+        var ch = document.getElementById("choice" + index)
         ch.style.display = "block"
+
         let id = "Number";
-        let seconds = 5;
-        playVid("music"+index)
+        let seconds = 3;
+        //Open sound
+        playVid("music" + index);
+        document.getElementById(id).innerHTML = seconds + " S ";
+        seconds = seconds - 1;
         var z = setInterval(function () {
             document.getElementById(id).innerHTML = seconds + " S ";
             seconds = seconds - 1;
             if (seconds < 0) {
                 clearInterval(z);
-                pauseVid("music"+index);
+                pauseVid("music" + index);
+                document.getElementById("point").innerHTML = point + " score  ";
                 ch.style.display = "none"
                 next.style.display = "block"
-            }
+                var image = document.getElementById("image" + index);
+                image.style.display = "block"
+                var black = document.getElementById("black" + index);
+                black.style.display = "none"
 
+                var elems = document.getElementsByClassName("Answer");
+                for (var i = 0; i < elems.length; i++) {
+                    elems[i].disabled = false;
+                }
+
+            }
         }, 1000);
-    
     }
 
     function playVid(name) {
@@ -104,6 +188,7 @@
         var vid = document.getElementById(name);
         vid.pause();
     }
+
 </script>
 
 {% endblock %}

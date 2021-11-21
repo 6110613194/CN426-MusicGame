@@ -2,16 +2,30 @@
 {% block content %}
 
 
-<div >
-    <h3 style="text-align:center;">Welcome to my Music Game!</h3>
+<div style="text-align: center;">
+    <p class="fs-1" style="text-align: center;">Welcome to my Music Game!</p>
+    <label class="fs-2" style="text-align: center;">กติกาการเล่น</label><br><br>
+    <label class="fs-4" style="text-align: center;">1.กดปุ่มเริ่มเกม</label><br>
+    <label class="fs-4" style="text-align: center;">2.หลังจากเริ่มเกมจะนับเวลาถอยหลัง 5 วินาทีก่อนเพลงเล่น</label><br>
+    <label class="fs-4" style="text-align: center;">3.เมื่อเพลงเล่นมีเวลา 10
+        วินาทีในการทายเพลงให้ถูกต้อง(ตอบได้ครั้งเดียว)</label><br>
+    <label class="fs-4" style="text-align: center;">4.ถ้าทายถูกคะเเนนจะเพิ่ม</label><br>
 </div>
-
+<br>
 <center>
-    <form action="{% url 'play' %}" method="get">
+    <br>
+    <form action = "{% url 'play'%}"method= "post" class="row" style="text-align: center;">
         {% csrf_token %}
-        <button class="btn btn-primary" type="submit">Play</button>
+        <div class="col-2"></div>
+        <div class="col-3">
+            <input type="text" readonly class="form-control-plaintext" value="Input your spotify playlist id">
+        </div>
+        <div class="col-3">
+            <input name="playList" type="text" class="form-control" placeholder="1eQTM2gSBc9ARw1Pst4V72">
+        </div>
+        <div class="col-3">
+            <button type="submit" class="btn btn-primary mb-3">Play</button>
+        </div>
     </form>
 </center>
-
-
 {% endblock %}

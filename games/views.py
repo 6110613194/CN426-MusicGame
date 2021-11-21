@@ -2,23 +2,35 @@ from django.shortcuts import render,redirect
 from django.urls import reverse
 import requests
 import json ,random
-
+# Set variable
+ScoreList = [["pong",7,"1eQTM2gSBc9ARw1Pst4V72"],["mata",8,"1eQTM2gSBc9ARw1Pst4V72"],["time",6,"1eQTM2gSBc9ARw1Pst4V72"],["nut",10,"1eQTM2gSBc9ARw1Pst4V72"]]
 # Create your views here.
 def index(request):
     return render(request,'games/index.html')
 
 def play(request):
-    listMusic,listNameMusic = getPlayList("1eQTM2gSBc9ARw1Pst4V72")
+    
+    playList = request.POST['playList']    
+    if (playList == ""):
+        playList = "1eQTM2gSBc9ARw1Pst4V72"
+    listMusic,listNameMusic = getPlayList(playList)
     for i in range(len(listMusic)):
         randomList = listNameMusic.copy()
         random.shuffle(randomList)
         randomList.remove(listMusic[i]["nameMusic"])
         listMusic[i]["choice"] = [listMusic[i]["nameMusic"],randomList[0],randomList[1]]
         random.shuffle(listMusic[i]["choice"])
-    return render(request,'games/play.html',{"listMusic":listMusic,"numberMusic":len(listMusic)})
+    return render(request,'games/play.html',{"listMusic":listMusic,"numberMusic":len(listMusic),"playlist": playList })
 
 def score(request):
-    return render(request,'games/score.html')
+    if request.method == 'POST':
+        name = request.POST['name']
+        score = request.POST['score']
+        playlist = request.POST['playlist']
+        ScoreList.append([name,int(score),playlist])
+    listcopy = sorted(ScoreList,key=lambda x: x[1],reverse=True)
+    
+    return render(request,'games/score.html',{'ScoreList':listcopy})
 #function use in view
 
 def getToken():
@@ -57,13 +69,14 @@ def getPlayList(SID):
 
     listNameMusic = [] 
     json_data = []
+    temp = r.json()["tracks"]["items"]
+    random.shuffle(temp)
     for i in range(len(r.json()["tracks"]["items"])):
-        json_data.append({  "preview_url" : r.json()["tracks"]["items"][i]["track"]["preview_url"],
-                            "nameMusic":  r.json()["tracks"]["items"][i]["track"]["name"] ,
-                            "img" : r.json()["tracks"]["items"][i]["track"]["album"]["images"][0]["url"],
+        json_data.append({  "preview_url" : temp[i]["track"]["preview_url"],
+                            "nameMusic":  temp[i]["track"]["name"] ,
+                            "img" : temp[i]["track"]["album"]["images"][0]["url"],
                             "index":i+1
                             })
-        listNameMusic.append(r.json()["tracks"]["items"][i]["track"]["name"])
-
+        listNameMusic.append(temp[i]["track"]["name"])
     return json_data, listNameMusic
 

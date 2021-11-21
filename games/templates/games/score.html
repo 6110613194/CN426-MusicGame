@@ -5,6 +5,26 @@
 <div class="row log">
     <div class="mx-auto">
         <h1 style="text-align:center;">Top Score</h1>
+        <table class="table" style="text-align:center;">
+            <thead>
+                <tr>
+                    <th scope="col">Name</th>
+                    <th scope="col">Score</th>
+                    <th scope="col">Playlist</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for i in ScoreList%}
+                <tr>
+                    {% for j in i%}
+                    <td>{{j}}</td>
+                    {% endfor %}
+                </tr>
+                {% endfor %}
+               
+            </tbody>
+        </table>
+
     </div>
 </div>
 
